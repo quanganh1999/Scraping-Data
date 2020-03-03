@@ -3,4 +3,4 @@ BeautifulSoup4
 lxml
 peewee
 pymysql
-
+newspaper3k

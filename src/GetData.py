@@ -32,13 +32,13 @@ def vnexpress(url, ses):
         resHtml = BeautifulSoup(response.content, 'lxml') 
 
         #get title:
-        title = resHtml.find('h1', class_ = 'title_news_detail').text;
-        title = title.strip() #remove '/n' and space
+        title = resHtml.find('h1', class_ = 'title_news_detail')
 
         #get content:
-        contentHtml = resHtml.find_all('section', class_ = 'sidebar_1')
+        contentHtml = resHtml.find('section', class_ = 'sidebar_1')
+
         #Error if this new has no content
-        if(len(contentHtml) == 0):
+        if(title is None or contentHtml is None):
             #The web may change the format of html. 
             #So it should use newspaper3k for this situation
             article = Article(url, language = 'vi')
@@ -48,7 +48,7 @@ def vnexpress(url, ses):
                 raise Exception('No content')
             else:
                 return (pageUrl, article.title, article.meta_description +' '+ article.text)   
-        paragr = contentHtml[0].find_all('p', class_ = re.compile("Normal|description"))#get every paragraph
+        paragr = contentHtml.find_all('p', class_ = re.compile("Normal|description"))#get every paragraph
         for cktext in paragr:
             content += cktext.text
         return (pageUrl, title, content)

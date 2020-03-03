@@ -17,7 +17,7 @@ while id > 0:
     res = ses.get(url)
     
     #Check the limit of page
-    if(res.url == firstPage):
+    if res.url == firstPage:
         break
 
     #Get the url of first page
