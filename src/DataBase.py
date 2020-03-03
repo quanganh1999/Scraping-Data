@@ -31,8 +31,7 @@ def createEduNewTab():
 def insertMultiRecords(datas):
     # Can change the limit based on the max buffer size
     with mysql_db.atomic():
-        for batch in chunked(datas, 1500):
-            eduNew.insert_many(batch).execute()
+        eduNew.insert_many(datas, fields = [eduNew.url, eduNew.news_title, eduNew.news_content]).execute()
 
 
 def closeDB():

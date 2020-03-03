@@ -6,15 +6,22 @@ import GetData
 import DataBase
 
 
+# Initilize:
+#DB:
+print('Start to create DB')
+DataBase.make_connect()
+DataBase.createEduNewTab()
+limit_record = 100 #Max number of inserted records 
+
+#Scraping Data
 temUrl = 'https://vnexpress.net/giao-duc-p'  # template url
 dataSource = []  # Saving data
 id = 1
 firstPage = ''  # URL of first page
-ses = requests.Session()  # create session
 while id > 0:
     print(id)  # for debugging
     url = temUrl + str(id)  # actual URL
-    res = ses.get(url)
+    res = requests.get(url)
 
     # Check the limit of page
     if res.url == firstPage:
@@ -28,23 +35,21 @@ while id > 0:
     setUrls = GetData.getUrlsVnExpress(res)
     for link in setUrls:
         try:
-            data = GetData.vnexpress(link, ses)
+            data = GetData.vnexpress(link)
         except Exception as err:
             print("Missing data at " + link)
             print("Type Error: " + str(err.args))
         finally:
             dataSource.append(data)
+    #Check limit records to insert:
+    if(len(dataSource) >= limit_record):
+        DataBase.insertMultiRecords(dataSource)
+        dataSource.clear()
     id += 1
 
-print("number of news: " + str(len(dataSource)))
-# Transfer data to DB
-# Initilize:
-print('Start to create DB')
-DataBase.make_connect()
-DataBase.createEduNewTab()
-
-# Bulk Inserts:
-DataBase.insertMultiRecords(dataSource)
+#Check again if it still has datas
+if len(dataSource) != 0:
+    DataBase.insertMultiRecords(dataSource)
 
 # Close DB:
 DataBase.closeDB()

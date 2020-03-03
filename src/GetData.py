@@ -26,20 +26,20 @@ def getUrlsVnExpress(response):
 # Getting data of vnexpress
 
 
-def vnexpress(url, ses):
+def vnexpress(url):
     content = ""
     title = ""
-    response = ses.get(url)
+    response = rq.get(url)
     pageUrl = response.url  # get url
     if(response):
 
         # Parse Html
         resHtml = BeautifulSoup(response.content, 'lxml')
 
-        # get title:
+        # init title:
         title = resHtml.find('h1', class_='title_news_detail')
 
-        # get content:
+        # init content:
         contentHtml = resHtml.find('section', class_='sidebar_1')
 
         # Error if this new has no content
@@ -53,10 +53,14 @@ def vnexpress(url, ses):
                 raise Exception('No content')
             else:
                 return (pageUrl, article.title, article.meta_description + ' ' + article.text)
+
+        #The format of html is the same as the config 
+        title = title.text.strip()#remove \n and white space
         paragr = contentHtml.find_all('p', class_=re.compile(
             "Normal|description"))  # get every paragraph
         for cktext in paragr:
             content += cktext.text
+        content = content.strip() #remove \n and white space
         return (pageUrl, title, content)
     else:
         raise Exception('Fail to connect')
