@@ -1,7 +1,7 @@
 import peewee
 from peewee import *
 
-mysql_db = MySQLDatabase('news', user='root', password='25012000',
+mysql_db = MySQLDatabase('news', user='quanganh25', password='25012000',
                          host='localhost', port=3306)
 
 
@@ -24,16 +24,16 @@ def make_connect():
     mysql_db.connect(reuse_if_open=True)
 
 
-def createEduNewTab():
-    eduNew.create_table()
+def create_tables():
+    with mysql_db:
+        mysql_db.create_tables([eduNew])
 
 
-def insertMultiRecords(datas):
-    # Can change the limit based on the max buffer size
+def insert_multi_rec(datas):    
     with mysql_db.atomic():
-        eduNew.insert_many(datas, fields = [eduNew.url, eduNew.news_title, eduNew.news_content]).execute()
+        eduNew.insert_many(datas, fields = [eduNew.url, eduNew.news_title, eduNew.news_content]).on_conflict_ignore().execute()
 
 
-def closeDB():
+def close_db():
     if mysql_db.close():
         print("Closed connection with DB")

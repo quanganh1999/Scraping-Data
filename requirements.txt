@@ -1,6 +1,6 @@
-requests
-BeautifulSoup4
-lxml
-peewee
-pymysql
-newspaper3k
+beautifulsoup4==4.8.2
+lxml==4.5.0
+newspaper3k==0.2.8
+peewee==3.13.1
+PyMySQL==0.9.3
+requests==2.23.0

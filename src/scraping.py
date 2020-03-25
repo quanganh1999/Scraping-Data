@@ -2,54 +2,58 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-import GetData
-import DataBase
+import get_data
+import database
 
 
 # Initilize:
-#DB:
-print('Start to create DB')
-DataBase.make_connect()
-DataBase.createEduNewTab()
-limit_record = 100 #Max number of inserted records 
+def init_db():
+    print('Start to create DB')
+    database.make_connect()
+    database.create_tables()    
 
-#Scraping Data
-temUrl = 'https://vnexpress.net/giao-duc-p'  # template url
-dataSource = []  # Saving data
-id = 1
-firstPage = ''  # URL of first page
-while id > 0:
-    print(id)  # for debugging
-    url = temUrl + str(id)  # actual URL
-    res = requests.get(url)
+# Scraping Data
+# limit_record is max number of inserted records based on buffer size
+def scraping(temUrl='https://vnexpress.net/giao-duc-p', limit_record=1):
+    dataSource = []  # Saving data
+    id = 1
+    firstPage = ''  # URL of first page
+    while id > 0:
+        print(id)  # for debugging
+        url = temUrl + str(id)  # actual URL
+        res = requests.get(url)
 
-    # Check the limit of page
-    if res.url == firstPage:
-        break
+        # Check the limit of page
+        if res.url == firstPage:
+            break
 
-    # Get the url of first page
-    if id == 1:
-        firstPage = res.url
+        # Get the url of first page
+        if id == 1:
+            firstPage = res.url
 
-    # Get data from all news in this page
-    setUrls = GetData.getUrlsVnExpress(res)
-    for link in setUrls:
-        try:
-            data = GetData.vnexpress(link)
-        except Exception as err:
-            print("Missing data at " + link)
-            print("Type Error: " + str(err.args))
-        finally:
-            dataSource.append(data)
-    #Check limit records to insert:
-    if(len(dataSource) >= limit_record):
-        DataBase.insertMultiRecords(dataSource)
-        dataSource.clear()
-    id += 1
+        # Get data from all news in this page
+        setUrls = get_data.get_urls_vnexpress(res)
+        for link in setUrls:
+            try:
+                data = get_data.get_vnexpress(link)                        
+            except Exception as err:
+                print("Missing data at " + link)
+                print("Type Error: " + str(err.args))
+            finally:
+                dataSource.append(data)
+        # Check limit records to insert:    
+        if(len(dataSource) >= limit_record):
+            database.insert_multi_rec(dataSource)
+            dataSource.clear()
+        id += 1
 
-#Check again if it still has datas
-if len(dataSource) != 0:
-    DataBase.insertMultiRecords(dataSource)
+    # Check again if it still has datas
+    if len(dataSource) != 0:
+        database.insert_multi_rec(dataSource)
+    
+    # Close DB:
+    database.close_db()
 
-# Close DB:
-DataBase.closeDB()
+if(__name__ =='__main__'):
+    init_db()
+    scraping()
